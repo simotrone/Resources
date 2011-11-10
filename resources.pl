@@ -43,16 +43,16 @@ print "Found Triplette: ", scalar(@triplete) ,"\n";
 my @better_sigma   = (sort { $a->sigma <=> $b->sigma } @triplete)[0..4];
 
 # Scelgo solo le triplette con il primo coefficiente minimo più alto rispetto
-my @ordered_by_fst_min = sort { ($b->mins)[0] <=> ($a->mins)[0] } @triplete;
-my $higher_min         = ($ordered_by_fst_min[0]->mins)[0];
-my @better_fst_mins    = sort { ($a->mins)[2] <=> ($b->mins)[2] } grep { ($_->mins)[0] == $higher_min } @triplete;
+my @sorted_triplete = sort { ($b->sort)[0] <=> ($a->sort)[0] } @triplete;
+my $higher_min      = ($sorted_triplete[0]->sort)[0];
+my @better_fst_mins = sort { ($a->sort)[2] <=> ($b->sort)[2] } grep { ($_->sort)[0] == $higher_min } @triplete;
 
 
 my $i;
 my $num = ( @better_sigma > @better_fst_mins ) ? scalar(@better_sigma) : scalar(@better_fst_mins);
-printf("%40s\t%40s\n", 'per Sigma', "per 1° minimo [$higher_min]" );
+printf("%40s   %40s\n", 'per Sigma', "per 1° minimo [$higher_min]" );
 for ($i = 0; $i < $num; ++$i) {
-	printf("%40s\t%40s\n", $better_sigma[$i] || '' , $better_fst_mins[$i] || '' );
+	printf("%40s   %40s\n", $better_sigma[$i] || '' , $better_fst_mins[$i] || '' );
 }
 
 
@@ -152,13 +152,13 @@ sub weight {
 	};
 }
 
-# Mins (minimal values)
-# get @mins = $t->mins()
-sub mins {
+# Sort (ascending order)
+# get @sorted = $t->sort()
+sub sort {
 	my ($self) = @_;
-	return $self->{C}->{mins} //= do {
-		my @ordered = sort { $a <=> $b } $self->values;
-		return @ordered;
+	return $self->{C}->{sort} //= do {
+		my @sorted = sort { $a <=> $b } $self->values;
+		return @sorted;
 	};
 }
 
