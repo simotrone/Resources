@@ -80,8 +80,8 @@ use overload
 	'""' => sub {
 		my ($self) = @_;
 		my $str = '['. join(',', $self->values) .']'
-			.' '.(sprintf "σ: %.2f", $self->sigma)
-			.' '.(sprintf "μ: %.2f", $self->avg)
+			.' '.(sprintf "σ: %5.2f", $self->sigma)
+			.' '.(sprintf "μ: %5.2f", $self->avg)
 		;
 		return $str;
 	};
