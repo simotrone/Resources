@@ -20,6 +20,8 @@ sub usage {
         exit(0);
 }
 
+my @weights = (1,3,9);
+
 my ($x, $y, $z, $total) = (0, 0, 0, 0);
 
 given (scalar @ARGV) {
@@ -28,7 +30,7 @@ given (scalar @ARGV) {
         }
         when(3) {
                 ($x,$y,$z) = @ARGV;
-                $total = ($x + (3*$y) + (9*$z));
+                $total = ($weights[0] * $x) + ($weights[1] * $y) + ($weights[2] * $z);
         }
         default { usage(); }
 }
@@ -39,11 +41,11 @@ given (scalar @ARGV) {
 my @triplete = ();      # contiene le triplette
 my $N = $total;
 
-for($z = 0; $z <= ($N / 9); $z++) {
-        for($y = 0; $y <= ($N / 3); $y++) {
-                $x = $N - (3 * $y) - (9 * $z);
+for($z = 0; $z <= ($N / $weights[2]); $z++) {
+        for($y = 0; $y <= ($N / $weights[1]); $y++) {
+                $x = (1 / $weights[0]) * ($N - ($weights[1] * $y) - ($weights[2] * $z));
                 next if ($x < 0);
-		my $t = Tripleta->new(1,3,9);
+		my $t = Tripleta->new(@weights);
 		$t->values($x,$y,$z);
                 push @triplete, $t;
         }
@@ -55,25 +57,11 @@ print "Found Triplette: ", scalar(@triplete) ,"\n";
 my $list = ListT->new();
 $list->tuples(@triplete);
 
-# Scelgo i primi 5 valori con deviazione standard più bassa
-#my @better_sigma   = (sort { $a->sigma <=> $b->sigma } @triplete)[0..4];
-my @better_sigma   = ($list->by_sigma)[0..4];
+printf("min: %d\n", $list->maxmin);
+my @selected = sort {$a->sigma <=> $b->sigma } grep { ($_->sort)[0] == $list->maxmin } $list->by_min;
+print "$_\n" for @selected;
 
-# Scelgo solo le triplette con il primo coefficiente minimo più alto rispetto
-my @sorted_triplete = sort { ($b->sort)[0] <=> ($a->sort)[0] } @triplete;
-my $higher_min      = ($sorted_triplete[0]->sort)[0];
-my @better_fst_mins = sort { ($a->sort)[2] <=> ($b->sort)[2] } grep { ($_->sort)[0] == $higher_min } @triplete;
-
-
-my $i;
-my $num = ( @better_sigma > @better_fst_mins ) ? scalar(@better_sigma) : scalar(@better_fst_mins);
-printf("%40s   %40s\n", 'per Sigma', "per 1° minimo [$higher_min]" );
-for ($i = 0; $i < $num; ++$i) {
-	printf("%40s   %40s\n", $better_sigma[$i] || '' , $better_fst_mins[$i] || '' );
-}
-
-
-
+# end
 
 package ListT;
 
@@ -95,11 +83,28 @@ sub tuples {
 }
 
 sub by_sigma {
-	my ($self) = @_;
+	my ($self) = shift;
 	return $self->{C}->{sigma} //= do {
-		my @sigma_sorted = sort { $a->sigma <=> $b->sigma } @{$self->{T}};
+		my @sigma_sorted = sort { $a->sigma <=> $b->sigma } $self->tuples;
 		return @sigma_sorted;
 	}
+}
+
+sub by_min {
+        my ($self) = shift;
+        return $self->{C}->{minsort} //= do {
+                my @min_sorted = sort { ($b->sort)[0] <=> ($a->sort)[0] } $self->tuples;
+                $self->{C}->{maxmin} = ($min_sorted[0]->sort)[0];
+                return @min_sorted;
+        }
+}
+
+sub maxmin {
+        my ($self) = shift;
+        return $self->{C}->{maxmin} //= do {
+                $self->by_min;
+                return $self->{C}->{maxmin};
+        }
 }
 
 
@@ -112,8 +117,8 @@ use overload
 	'""' => sub {
 		my ($self) = @_;
 		my $str = '['. join(',', $self->values) .']'
-			.' '.(sprintf "σ: %5.2f", $self->sigma)
 			.' '.(sprintf "μ: %5.2f", $self->avg)
+			.' '.(sprintf "σ: %5.2f", $self->sigma)
 		;
 		return $str;
 	};
