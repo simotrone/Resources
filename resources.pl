@@ -7,6 +7,19 @@ use strict;
 use warnings;
 use feature "switch";
 
+################
+sub usage {
+        print
+                "Usage: $0 {<total>|<q1> <q2> <q3>}\n"
+                ."Arguments:\n"
+                ."\t<total>\n"
+                ."\t\tor\n"
+                ."\t<q1> <q2> <q3> are the 3 quantity that add up give total\n"
+        ;
+
+        exit(0);
+}
+
 my ($x, $y, $z, $total) = (0, 0, 0, 0);
 
 given (scalar @ARGV) {
@@ -39,8 +52,12 @@ for($z = 0; $z <= ($N / 9); $z++) {
 print "Total resources: $total\n";
 print "Found Triplette: ", scalar(@triplete) ,"\n";
 
+my $list = ListT->new();
+$list->tuples(@triplete);
+
 # Scelgo i primi 5 valori con deviazione standard più bassa
-my @better_sigma   = (sort { $a->sigma <=> $b->sigma } @triplete)[0..4];
+#my @better_sigma   = (sort { $a->sigma <=> $b->sigma } @triplete)[0..4];
+my @better_sigma   = ($list->by_sigma)[0..4];
 
 # Scelgo solo le triplette con il primo coefficiente minimo più alto rispetto
 my @sorted_triplete = sort { ($b->sort)[0] <=> ($a->sort)[0] } @triplete;
@@ -57,17 +74,32 @@ for ($i = 0; $i < $num; ++$i) {
 
 
 
-################
-sub usage {
-        print
-                "Usage: $0 {<total>|<q1> <q2> <q3>}\n"
-                ."Arguments:\n"
-                ."\t<total>\n"
-                ."\t\tor\n"
-                ."\t<q1> <q2> <q3> are the 3 quantity that add up give total\n"
-        ;
 
-        exit(0);
+package ListT;
+
+sub new {
+	my ($class) = @_;
+	bless {
+		T => [],
+		C => {},
+	}, $class;
+}
+
+sub tuples {
+	my ($self, @tuples) = @_;
+	if(@tuples) {
+		$self->{T} = [@tuples];
+		$self->{C} = {};
+	}
+	return @{$self->{T}};
+}
+
+sub by_sigma {
+	my ($self) = @_;
+	return $self->{C}->{sigma} //= do {
+		my @sigma_sorted = sort { $a->sigma <=> $b->sigma } @{$self->{T}};
+		return @sigma_sorted;
+	}
 }
 
 
