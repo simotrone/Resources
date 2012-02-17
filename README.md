@@ -1,13 +1,13 @@
-We have three basckets, each containing a quantity (q1, q2, q3) of different
-food (vegetables, pasta, meat).
+We have three baskets, each containing a quantity (q1, q2, q3) of different
+kind of food (vegetables, pasta, meat).
 
-Each food has its own costs in realtion to the other two type: you can get 
-1 pasta swapping 3 vegetables, and 1 meat returning 3 pastes (or 9 vegetables).
+Each type of food has its own cost in relation to the other two types: you can get 
+1 pasta swapping 3 vegetables, and 1 meat returning 3 pastas (or 9 vegetables).
 
-Given an arbitrary distribution of these quantities, to obtain the most
+Given an arbitrary distribution of these quantities, obtain the most
 balanced (*) distribution of types of food.
 
-(*) Balanced to eat all three meals for more consecutive days as possibile.
+(*) Balanced to eat all three meals for more consecutive days as possible.
 
 
 ### Here we go
