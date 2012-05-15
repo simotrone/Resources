@@ -1,4 +1,83 @@
-Problem:
+We have three baskets, each containing a quantity (q1, q2, q3) of different
+kind of food (vegetables, pasta, meat).
+
+Each type of food has its own cost in relation to the other two types: you can get 
+1 pasta swapping 3 vegetables, and 1 meat returning 3 pastas (or 9 vegetables).
+
+Given an arbitrary distribution of these quantities, obtain the most
+balanced (*) distribution of types of food.
+
+(*) Balanced to eat all three meals for more consecutive days as possible.
+
+
+### Here we go
+Ipotesi: (constraints)
+	
+	ax + by + cz = Const (starting situation)
+	y = 3x
+	z = 3y
+
+	(So, weights are 1, 3, 9.)
+
+Thesis:
+
+        ix + jy + kz = Const    (final situation)
+
+	with
+
+        i ~= j ~= k             (I mean near values)
+
+        For perfect balance I mean i = j = k
+
+Proof and notes:
+
+	ax + by + cz = ax + 3bx + 9cx = (a + 3b + 9c) x = N x
+
+	Need to find coeffients that describe new distribution:
+
+	ix + jy + kz = (i + 3j + 9k) x = N x
+	so
+	i + 3j + 9k = N
+
+	So i have
+
+	i = N - 3j - 9k
+	j = ?
+	k = ?
+
+	In Reals we have infinite solutions.
+	In Naturals{0} we have constraints that bind problem to finite
+	solutions:
+
+        0 <= i <= N
+        0 <= j <= N/3
+        0 <= k <= N/9
+
+	From this we can obtain finite number of tuples (i,j,k) with
+	the coefficients that redistribute the N value.
+
+	How to choose the most appropriate triplets? (the most balanced)
+
+	I can take the minimum value of the three coefficients for each
+	tuple and associate it to the tuple; after this, choosing the
+	tuples with higher minimum I obtain best tuples in first approximation.
+
+
+Notes:
+
+	See Cluster Data Analysis.
+
+        For N great values we can reduce range intervals to:
+
+        N/2 < i <= N
+        0   < j <= N/3
+        0   < k <= N/9
+
+	and cut (before to calculate) useless tuples. 
+
+
+
+## Italiano
 
         Abbiamo tre ceste, ognuna con dentro una quantita'
         (q1, q2, q3) di cibo diversa (verdura, pasta, carne).
@@ -13,7 +92,7 @@ Problem:
 	* Equilibrato in modo da mangiare piu' giorni possibili
 	consecutivi tutte e tre le pietanze.
 
-##### Here we go #####
+### Here we go
 Ipotesi: (vincoli)
 
           ax + by + cz = Const    (situazione iniziale)
@@ -28,7 +107,7 @@ Tesi:
 
         Per equilibrati si intende i = j = k
 
-Dimostrazione: (procedure?)
+Dimostrazione e procedure:
 
         ax + by + cz = ax + 3bx + 9cx = (a + 3b + 9c) x = N x
 
