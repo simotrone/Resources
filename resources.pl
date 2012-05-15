@@ -7,8 +7,6 @@ use warnings;
 use feature "switch";
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Trone::Resources::Tuple;
-use Trone::Resources::TuplesList;
 use Trone::Resources::Manager::Equation3;
 
 ################
