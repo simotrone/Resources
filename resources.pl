@@ -9,6 +9,7 @@ use FindBin;
 use lib "$FindBin::Bin/lib";
 use Trone::Resources::Tuple;
 use Trone::Resources::TuplesList;
+use Trone::Resources::Manager::Equation3;
 
 ################
 sub usage {
@@ -38,27 +39,16 @@ given (scalar @ARGV) {
         default { usage(); }
 }
 
+my $m = Trone::Resources::Manager::Equation3->new(
+        weights => [@weights],
+        total   => $total
+)->compute();
 
 
+print "Total resources: ", $m->total,"\n";
+print "Found Triplette: ", scalar $m->list->tuples ,"\n";
 
-my @triplete = ();      # contiene le triplette
-my $N = $total;
-
-for($z = 0; $z <= ($N / $weights[2]); $z++) {
-        for($y = 0; $y <= ($N / $weights[1]); $y++) {
-                $x = (1 / $weights[0]) * ($N - ($weights[1] * $y) - ($weights[2] * $z));
-                next if ($x < 0);
-		my $t = Trone::Resources::Tuple->new(@weights);
-		$t->values($x,$y,$z);
-                push @triplete, $t;
-        }
-}
-
-print "Total resources: $total\n";
-print "Found Triplette: ", scalar(@triplete) ,"\n";
-
-my $list = Trone::Resources::TuplesList->new();
-$list->tuples(@triplete);
+my $list = $m->list;
 
 printf("min: %d\n", $list->maxmin);
 my @selected = sort {$a->sigma <=> $b->sigma } grep { ($_->sort)[0] == $list->maxmin } $list->by_min;
