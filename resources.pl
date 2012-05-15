@@ -5,43 +5,47 @@
 use strict;
 use warnings;
 use feature "switch";
+use Getopt::Long;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use Trone::Resources::Manager::Equation3;
 
-################
-sub usage {
-        print
-                "Usage: $0 {<total>|<q1> <q2> <q3>}\n"
-                ."Arguments:\n"
-                ."\t<total>\n"
-                ."\t\tor\n"
-                ."\t<q1> <q2> <q3> are the 3 quantity that add up give total\n"
-        ;
+my $help = 0;
+my $weights = '';
+my $values = '';
+my $res = GetOptions(
+        'help'      => \$help,
+        'weights=s' => \$weights,
+        'values=s'  => \$values,
+);
 
-        exit(0);
+my @weights = split /,/, $weights;
+usage() if (!$res or $help or @weights < 2);
+# continue if @weights > 1
+
+my $total = 0;
+if ($values) {
+        # if values are setted
+        my @values = split /,/, $values;
+        usage() if (@values != @weights);
+        map { $total += $values[$_] * $weights[$_] } 0 .. $#values;
+} elsif (@ARGV == 1) {
+        # if argv holds just one total
+        $total = $ARGV[0];
+} elsif (@ARGV > 1) {
+        # if argv holds the right number of args
+        usage() if (@ARGV != @weights);
+        map { $total += $ARGV[$_] * $weights[$_] } 0 .. $#ARGV;
+} else {
+        usage();
 }
 
-my @weights = (1,3,9);
-
-my ($x, $y, $z, $total) = (0, 0, 0, 0);
-
-given (scalar @ARGV) {
-        when(1) {
-                $total = $ARGV[0];
-        }
-        when(3) {
-                ($x,$y,$z) = @ARGV;
-                $total = ($weights[0] * $x) + ($weights[1] * $y) + ($weights[2] * $z);
-        }
-        default { usage(); }
-}
+# compute!
 
 my $m = Trone::Resources::Manager::Equation3->new(
         weights => [@weights],
         total   => $total
 )->compute();
-
 
 print "Total resources: ", $m->total,"\n";
 print "Found Triplette: ", scalar $m->list->tuples ,"\n";
@@ -52,8 +56,23 @@ printf("min: %d\n", $list->maxmin);
 my @selected = sort {$a->sigma <=> $b->sigma } grep { ($_->sort)[0] == $list->maxmin } $list->by_min;
 print "$_\n" for @selected;
 
+exit 0;
 
+sub usage {
+        print <<EOH;
+Usage: $0 -w 1,3,9 [options] {<total>|<q1> <q2> <q3>}
 
+        -w | --weights a,b,..,n   weights for every coefficient
+
+        <total>                   one integer as sum of quantities
+        <q1> .. <qn>              single quantities
+
+        Options:
+        -v | --values a,b,..,n    quantities as <q1> .. <qn>
+        -h | --help               show this help
+EOH
+        exit(0);
+}
 
 __END__
 
